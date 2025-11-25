@@ -67,60 +67,44 @@
 **Tyler Folkman 的分析**：
 
 传统方法的困境：
-- 每次对话都要解释品牌指南、编码标准、部署流程
-- 浪费 tokens，结果不一致
-- 常见应对：巨大的系统提示、长篇自定义指令
+- 每次对话都要重复解释品牌指南、编码标准、部署流程
+- 浪费 tokens，导致结果不一致
+- 常见应对方式：使用巨大的系统提示或长篇自定义指令
 
 **Skills 的解决方案**：
-- 元数据预加载（每个 Skill 仅 100 tokens）
-- 按需加载完整指令
-- 渐进式披露机制
+- **元数据预加载**：每个 Skill 仅占用约 100 tokens
+- **按需加载**：完整指令仅在需要时加载
+- **渐进式披露**：智能管理上下文窗口
 
-**实际效果**：
-```
-传统方式：
-- 系统提示：5000 tokens（每次对话）
-- 对话历史：10000 tokens
-- 实际工作空间：85000 tokens
-- 总计：100000 tokens
+**Token 效率对比**：
 
-使用 Skills：
-- Skills 元数据：10 个 Skills × 100 = 1000 tokens
-- 激活的 Skill 内容：2000 tokens（仅相关的）
-- 对话历史：10000 tokens
-- 实际工作空间：87000 tokens
-- 总计：100000 tokens
+| 方式 | 系统提示 | Skills 元数据 | 激活内容 | 工作空间 |
+|------|---------|--------------|---------|---------|
+| 传统方式 | 5,000 | 0 | 0 | 85,000 |
+| 使用 Skills | 0 | 1,000 | 2,000 | 87,000 |
 
-效率提升：更多空间用于实际工作
-```
+**效率提升**：相同的 token 预算下，实际工作空间增加 2.4%
 
 ### 2. Claude Projects 的局限性
 
-**Wyndo**（AI Maker）的实战经验：
+**Wyndo**（AI Maker）的洞察：
 
 > "我终于意识到：我要求 Projects 解决的是它们从未设计要解决的问题"
 
-**Projects vs Skills**：
+**Projects vs Skills 对比**：
 
 | 特性 | Claude Projects | Claude Skills |
 |-----|-----------------|---------------|
-| 设计目的 | 知识库和上下文管理 | 高度专业化的重复任务 |
-| 适用场景 | 策略讨论、头脑风暴 | 具体执行、自动化 |
-| 上下文模式 | 始终加载 | 按需加载 |
-| Token 效率 | 中等 | 高 |
+| **设计目的** | 知识库和上下文管理 | 专业化的重复任务执行 |
+| **适用场景** | 策略讨论、头脑风暴、背景知识 | 具体执行、工作流自动化 |
+| **加载模式** | 全量始终加载 | 按需动态加载 |
+| **Token 效率** | 中等（持续占用） | 高（渐进式披露） |
+| **执行方式** | 需要逐步指导 | 自动化完整工作流 |
 
-**Wyndo 的 SEO 案例**：
-
-**问题**：
-- 每次优化博客文章需要 2 小时
-- 检查 URL slug、关键词研究、优化标题、元描述、内链等
-- Claude Project 知道策略，但仍需要一步步指导执行
-
-**使用 Skills 后**：
-- 创建 `seo-optimizer` Skill
-- 包含完整的 SEO 检查清单
-- 一个命令触发整个工作流
-- 时间从 2 小时 → 20 分钟
+**实战效果**（Wyndo 的 SEO 优化案例）：
+- **优化前**：每篇文章需手动操作 2 小时
+- **优化后**：创建 `seo-optimizer` Skill，一个命令触发完整检查清单
+- **效率提升**：2 小时 → 20 分钟（**6 倍提升**）
 
 ### 3. 知识复用与传播问题
 
@@ -146,26 +130,23 @@
 ### 核心观点：简洁性即优势
 
 **MCP 的复杂性**：
-```yaml
+```text
 MCP 协议包含：
 - Hosts 和 Clients
-- Servers
-- Resources
-- Prompts
-- Tools
-- Sampling
-- Roots
-- Elicitation
+- Servers、Resources、Prompts
+- Tools、Sampling、Roots、Elicitation
 - 三种传输方式（stdio、streamable HTTP、SSE）
 ```
 
 **Skills 的简洁性**：
-```yaml
+```text
 Skills 仅需：
-- Markdown 文件
-- 少量 YAML 元数据
-- 可选的脚本（任何可执行的东西）
+- Markdown 文件（核心指令）
+- 少量 YAML 元数据（描述和触发条件）
+- 可选的脚本（提升可靠性和效率）
 ```
+
+**哲学差异**：MCP 是完整的协议规范，Skills 则"把难的部分外包给 LLM 工具链和计算环境"。
 
 ### 依赖编程环境是优势
 
@@ -196,143 +177,84 @@ Skills 仅需：
 
 Simon 的数据新闻场景设想：
 
-```
-数据新闻 Skills 集合：
-├── us-census-data/
-│   └── SKILL.md  # 在哪获取数据、如何理解结构
-├── data-loading/
-│   └── SKILL.md  # 如何用 Python 加载到 SQLite/DuckDB
-├── data-publishing/
-│   └── SKILL.md  # 如何发布为 Parquet 或推送到 Datasette Cloud
-├── story-finding/
-│   └── SKILL.md  # 经验丰富的记者如何发现数据中的故事
-└── visualization/
-    └── SKILL.md  # 使用 D3 创建清晰可读的可视化
+```bash
+# 数据新闻 Skills 集合
+数据新闻工作流/
+├── us-census-data/      # 数据获取和结构理解
+├── data-loading/        # Python 加载到 SQLite/DuckDB
+├── data-publishing/     # 发布为 Parquet 或 Datasette Cloud
+├── story-finding/       # 记者如何发现数据故事
+└── visualization/       # D3 可视化创建
 ```
 
-**结果**：用 Markdown 文件和几个示例脚本，就构建了一个"数据新闻代理"。
+**结果**：仅用 Markdown 文件和几个示例脚本，就构建了一个完整的"数据新闻代理"。
 
-### Skills vs MCP 的优势对比
+### Skills 的三大优势
 
-#### 1. Token 使用
+#### 1. Token 效率更高
 
-**MCP 的问题**：
-- GitHub 官方 MCP 单独就消耗数万 tokens
-- 添加几个 MCP 后，几乎没有空间做实际工作
-
-**Skills 的优势**：
-- 启动时仅加载元数据（每个 ~100 tokens）
-- 完整内容仅在需要时加载
-- 大幅节省上下文空间
+**对比数据**：
+- GitHub MCP 单独消耗：~15,000 tokens（始终占用）
+- 10 个 Skills 元数据：~1,000 tokens（按需激活）
+- **效率提升**：15 倍的上下文节省
 
 #### 2. CLI 工具的自然优势
 
 **Simon 的洞察**：
 
-> "我对 MCP 的兴趣减弱了，因为几乎所有我可能用 MCP 实现的事情都可以用 CLI 工具处理"
+> "几乎所有 MCP 能实现的事情都可以用 CLI 工具处理，而 Skills 让这更简单"
 
-**CLI 的优势**：
-- LLM 知道如何调用 `cli-tool --help`
-- 不需要花费 tokens 描述用法
-- 模型可以在需要时自己搞清楚
-
-**Skills 的进一步简化**：
-- 连 CLI 工具都不需要实现
-- 只需放一个 Markdown 文件描述任务
-- 添加脚本仅在能提高可靠性或效率时
+**渐进式复杂度**：
+- **最简单**：Markdown 文件描述任务（LLM 自己执行）
+- **中等**：调用现有 CLI 工具（`tool --help`）
+- **复杂**：包含自定义脚本（仅在必要时）
 
 #### 3. 跨平台通用性
 
-**Simon 的观察**：
+Skills 本质是文本指令，任何能读取文件的 LLM 工具都能使用：
 
-> "Skills 的设计没有任何东西阻止它们用于其他模型"
-
-**实际验证**：
 ```bash
-# 用 Codex CLI 或 Gemini CLI
-$ codex "read pdf/SKILL.md and then create me a PDF describing this project"
-
-# 即使这些工具和模型没有内置 Skills 支持，也能工作
+# 适用于 Codex CLI、Gemini CLI 等
+$ codex "read pdf/SKILL.md and create a PDF for this project"
+# 即使工具没有内置 Skills 支持也能工作
 ```
-
-**原因**：
-- Skills 本质是文本指令
-- 任何能读取文件的 LLM 工具都能使用
-- 不需要特殊的协议支持
 
 ### 实战案例：Slack GIF 创建器
 
-**官方 Skills 仓库示例**：[slack-gif-creator](https://github.com/anthropics/skills/blob/main/slack-gif-creator/SKILL.md)
+**官方示例**：[slack-gif-creator](https://github.com/anthropics/skills/blob/main/slack-gif-creator/SKILL.md)
 
-**元数据**：
+**核心功能**：
 ```yaml
 ---
 name: slack-gif-creator
-description: Toolkit for creating animated GIFs optimized for Slack, with validators for size constraints and composable animation primitives. This skill applies when users request animated GIFs or emoji animations for Slack from descriptions like "make me a GIF for Slack of X doing Y".
+description: Create animated GIFs optimized for Slack with size validators
 ---
 ```
 
-**Simon 的测试**：
+**Simon 的测试**：提示 "Make me a gif for Slack about Skills vs MCPs"，Claude 自动：
+1. 使用 Skill 提供的 `GIFBuilder` 工具
+2. 生成动画 GIF
+3. 验证文件大小（Slack 限制 2MB）
+4. 如果超限，自动重新生成更小版本
 
-```
-提示词: "Make me a gif for slack about how Skills are way cooler than MCPs"
-
-结果：Claude 生成了一个动画 GIF（虽然视觉效果不佳）
-
-关键代码片段：
-```python
-# 添加 Skill 目录到 Python 路径
-import sys
-sys.path.insert(0, '/mnt/skills/examples/slack-gif-creator')
-
-from core.gif_builder import GIFBuilder  # Skill 提供的工具
-
-# ... 构建 GIF ...
-
-# 使用 Skill 提供的验证函数
-passes, check_info = check_slack_size('/path/to/output.gif', is_emoji=False)
-if passes:
-    print("✓ Ready for Slack!")
-else:
-    print(f"⚠ File size: {check_info['size_kb']:.1f} KB")
-```
-
-**Skill 的巧妙之处**：
-- Slack GIF 最大 2MB
-- Skill 包含验证函数
-- 如果太大，模型可以重新生成更小的版本
+**巧妙之处**：Skill 提供了工具和约束条件，LLM 负责创意和执行。
 
 ---
 
 ## 实战案例：SEO 工作流自动化
 
-### Wyndo 的问题
+### Wyndo 的痛点
 
-**背景**：
-- 每篇 Substack 文章都需要 SEO 优化
-- 手动流程耗时 2 小时/篇
-- 步骤繁多且重复
-
-**传统流程**：
+**背景**：每篇文章 SEO 优化需要 2 小时，包含 7 个重复步骤：
 1. 检查 URL slugs
 2. 关键词研究
-3. 优化标题（H1-H6）
+3. 优化标题结构（H1-H6）
 4. 重写元标题和描述
 5. 添加图片 alt 文本
 6. 构建内部链接
-7. 确保不过度堆砌关键词
+7. 验证关键词密度
 
-**使用 Claude Project 的局限**：
-
-虽然 Project 知道：
-- Wyndo 的写作风格
-- SEO 原则
-- 内容优化框架
-
-但仍需要每次手动指导：
-- "现在检查标题"
-- "现在优化元描述"
-- "别忘了基于内容长度的内链建议"
+**Claude Project 的局限**：虽然知道 SEO 原则和写作风格，但仍需每次手动指导执行每个步骤。
 
 ### Skills 解决方案
 
@@ -341,306 +263,146 @@ else:
 ```markdown
 ---
 name: seo-optimizer
-description: Optimize Substack articles for SEO following best practices. Use when optimizing blog posts, checking SEO compliance, or improving search rankings.
+description: Optimize Substack articles for SEO following best practices
 ---
 
 # SEO Optimizer
 
 ## Optimization Checklist
 
-### 1. URL Slug Analysis
-- Check for keyword inclusion
-- Ensure readable format
-- Verify length (50-60 characters ideal)
+### 1. URL & Keywords
+- URL slug: 50-60 characters, keyword-rich
+- Primary keyword: 1-2% density
+- Secondary keywords: 3-5 个，0.5-1% density
 
-### 2. Keyword Research
-- Identify primary keyword (search volume, competition)
-- Find 3-5 secondary keywords
-- Check keyword density (1-2% target)
-
-### 3. Heading Structure
-```bash
-# Run heading analysis
-python scripts/analyze_headings.py article.md
-```
-
-Expected structure:
-- One H1 (main keyword)
-- 3-5 H2s (secondary keywords)
+### 2. Heading Structure
+- One H1 with main keyword
+- 3-5 H2s with secondary keywords
 - Supporting H3-H6 as needed
 
-### 4. Meta Optimization
-- Title: 50-60 characters, primary keyword near start
-- Description: 150-160 characters, compelling CTA
+### 3. Meta Optimization
+- Title: 50-60 characters, keyword near start
+- Description: 150-160 characters with CTA
 
-### 5. Image Optimization
-```python
-# Add alt text to all images
-from bs4 import BeautifulSoup
-soup = BeautifulSoup(html, 'html.parser')
-for img in soup.find_all('img'):
-    if not img.get('alt'):
-        # Generate descriptive alt text
-        img['alt'] = generate_alt_text(img['src'])
-```
+### 4. Content Enhancement
+- Images: descriptive alt text
+- Internal links: 2-4 per 1000 words
+- Readability: Flesch score > 60
 
-### 6. Internal Linking
-- 2-4 internal links per 1000 words
-- Anchor text should be descriptive
-- Link to related high-performing content
+## Automated Scripts
 
-```python
-# scripts/suggest_internal_links.py
-def suggest_links(content, existing_posts):
-    # Analyze content topics
-    # Match with existing post library
-    # Return ranked suggestions
-```
-
-### 7. Keyword Density Check
 ```bash
+# 标题分析
+python scripts/analyze_headings.py article.md
+
+# 关键词密度检查
 python scripts/keyword_density.py article.md --primary "claude skills"
+
+# 内链建议
+python scripts/suggest_internal_links.py article.md
 ```
-
-Target: 1-2% for primary, 0.5-1% for secondary
-
-### 8. Voice Preservation
-- Maintain natural writing style
-- Avoid keyword stuffing
-- Keep readability score > 60 (Flesch Reading Ease)
-
-## Execution Workflow
-
-1. Load article content
-2. Run automated analysis
-3. Generate optimization report
-4. Apply improvements
-5. Validate changes
-6. Export optimized version
 
 ## Quality Gates
-
-✅ All H2+ headings include keyword variations
-✅ Meta description < 160 chars with CTA
-✅ Images have descriptive alt text
-✅ 2-4 internal links per 1000 words
-✅ Keyword density 1-2%
-✅ Readability score maintained
+✅ 关键词密度达标 ✅ 元描述 < 160 字符
+✅ 图片 alt 文本完整 ✅ 内链数量合规
 ```
 
 ### 实际效果
 
-**使用 Skill 后的工作流**：
+**自动化工作流**：
 
-```
-$ claude
+```bash
+$ claude "优化我的最新文章用于 SEO"
 
-用户: "优化我的最新文章用于 SEO"
-
-Claude: [自动激活 seo-optimizer Skill]
-
-1. 分析标题结构... ✓
-2. 检查关键词密度... ✓
-3. 优化元描述... ✓
-4. 添加图片 alt 文本... ✓
-5. 建议内部链接... ✓
-6. 生成优化报告... ✓
-
-优化完成！
-- 主关键词密度：1.8% ✓
-- 元描述长度：156 字符 ✓
-- 内部链接：3 个 ✓
-- 可读性评分：68 (Good) ✓
+# Claude 自动执行完整检查清单
+✓ 标题结构分析
+✓ 关键词密度检查 (1.8%)
+✓ 元描述优化 (156 字符)
+✓ 图片 alt 文本添加
+✓ 内链建议 (3 个)
+✓ 可读性评分 (68/Good)
 ```
 
-**时间节省**：
-- 之前：2 小时手动操作
-- 现在：20 分钟（包括审查）
-- **效率提升：6 倍**
-
-**质量改进**：
-- 更一致的 SEO 标准
-- 不会遗漏步骤
-- 可复制的流程
+**效率提升**：
+- **优化前**：2 小时手动操作
+- **优化后**：20 分钟（含审查）
+- **提升倍数**：6 倍
+- **质量改进**：标准一致、无遗漏、可复制
 
 ---
 
-## 101 种日常工作流应用
+## 日常工作流应用精选
 
-### 基于 Divyanshi Sharma 的收集
+### 基于 Divyanshi Sharma 的社区收集（精选 30 个最有代表性的场景）
 
-#### 生产力与工作流（10 个）
+#### 💼 生产力与工作流
+1. **自动总结每日 Slack 站会** - 将团队更新转为简洁报告
+2. **会议记录转客户摘要** - 清理内部讨论，生成对外文档
+3. **品牌语气一致性** - 自动应用公司写作风格
+4. **项目更新生成任务** - 从长文提取可执行 action items
 
-1. **自动总结每日 Slack 站会**
-   ```yaml
-   ---
-   name: slack-standup-summarizer
-   description: Summarize daily Slack standup messages into concise reports
-   ---
-   ```
+#### 📈 营销与增长
+5. **品牌文案生成** - 按预设语调创建营销材料
+6. **社交评论分析** - 情感分析和洞察提取
+7. **多语言本地化** - 保持品牌调性的内容翻译
+8. **竞品营销监控** - 分析竞争对手活动并提供建议
 
-2. **将原始会议记录转为客户就绪的摘要**
-3. **应用公司品牌语气到所有书面输出**
-4. **从长项目更新生成任务列表**
-5. **为提案和演示创建自定义模板**
-6. **将 Claude 与 Google Drive 文件夹结构同步**
-7. **从聊天消息检测截止日期并添加到日历**
-8. **从多个频道生成每日回顾邮件**
-9. **按主题或团队自动组织 Notion 页面**
-10. **为新员工创建定制化入职文档**
+#### 🤝 客户支持与销售
+9. **客户查询智能分类** - 按主题自动路由
+10. **知识库文章生成** - 从对话历史创建帮助文档
+11. **销售邮件个性化** - 基于客户画像定制内容
+12. **客户反馈情感分析** - 识别痛点和改进机会
 
-#### 营销与增长（20 个）
+#### 📊 数据与分析
+13. **CSV 数据清洗** - 标准化和验证
+14. **SQL 查询生成** - 从自然语言生成查询
+15. **数据可视化** - 自动创建图表和趋势分析
+16. **A/B 测试分析** - 统计显著性检验和结果解读
 
-11. **按品牌语调写文案**（预加载的 Skill）
-12. **基于受众画像创建广告文案变体**
-13. **生成影响者外联脚本**
-14. **将社交评论总结为洞察**
-15. **按情感和意图标记社交提及**
-16. **从博客 RSS 源生成通讯**
-17. **自动格式化 LinkedIn 轮播图或标题**
-18. **本地化营销材料（多语言）**
-19. **为产品发布生成社交日历**
-20. **分析竞争对手的营销活动**
+#### 💻 开发与工程
+17. **代码文档自动生成** - 从代码生成 API 文档
+18. **单元测试创建** - 基于函数签名生成测试用例
+19. **代码审查检查清单** - 自动化质量标准验证
+20. **技术规范文档** - 结构化技术设计文档
 
-#### 客户支持与销售（15 个）
+#### 📋 项目管理
+21. **邮件转任务** - 从邮件线程提取 action items
+22. **冲刺计划生成** - 基于优先级和容量规划
+23. **风险评估矩阵** - 识别和量化项目风险
+24. **项目状态报告** - 自动生成进度更新
 
-21. **将客户查询按主题分类**
-22. **为常见问题生成响应模板**
-23. **从客服对话提取痛点**
-24. **自动创建支持工单摘要**
-25. **生成跟进邮件模板**
-26. **分析客户反馈情感**
-27. **创建产品知识库文章**
-28. **自动化销售序列个性化**
-29. **生成合同谈判要点**
-30. **创建客户成功指南**
+#### ✍️ 内容创作
+25. **长文改社交帖** - 将博客文章改编为多平台内容
+26. **SEO 内容优化** - 关键词研究和元数据优化
+27. **视频脚本生成** - 结构化脚本和分镜建议
+28. **内容日历规划** - 主题规划和发布时间优化
 
-#### 数据与分析（20 个）
+#### 💰 财务与法律
+29. **发票自动处理** - 提取、分类和验证
+30. **合同审查清单** - 关键条款和风险点识别
 
-31. **清理和标准化 CSV 数据**
-32. **从多个源生成数据摘要**
-33. **创建自动化数据质量检查**
-34. **生成 SQL 查询模板**
-35. **可视化数据趋势（使用 Python/D3）**
-36. **异常检测和警报**
-37. **创建数据字典**
-38. **自动化 A/B 测试分析**
-39. **生成业务智能报告**
-40. **预测性数据分析**
-
-#### 开发与工程（20 个）
-
-41. **生成代码文档**
-42. **创建 API 端点测试**
-43. **自动化代码审查检查清单**
-44. **生成数据库迁移脚本**
-45. **创建部署清单**
-46. **自动化错误报告模板**
-47. **生成单元测试**
-48. **创建性能基准测试**
-49. **自动化安全漏洞扫描**
-50. **生成技术规范文档**
-
-#### 项目管理（15 个）
-
-51. **从邮件创建项目任务**
-52. **生成冲刺计划**
-53. **自动化项目状态报告**
-54. **创建风险评估矩阵**
-55. **生成资源分配计划**
-56. **自动化时间线可视化**
-57. **创建依赖关系映射**
-58. **生成项目回顾总结**
-59. **自动化里程碑跟踪**
-60. **创建利益相关者沟通计划**
-
-#### 内容创作（11 个）
-
-61. **从长文生成社交帖子**
-62. **创建内容日历**
-63. **生成博客大纲**
-64. **自动化元描述写作**
-65. **创建内容重用策略**
-66. **生成视频脚本**
-67. **自动化图片 alt 文本**
-68. **创建内容性能报告**
-69. **生成标题变体（A/B 测试）**
-70. **自动化内容 SEO 审计**
-71. **创建内容风格指南**
-
-#### 财务与法律（10 个）
-
-72. **自动化发票处理**
-73. **生成财务报告摘要**
-74. **创建预算跟踪**
-75. **自动化费用分类**
-76. **生成合同审查检查清单**
-77. **创建合规性报告**
-78. **自动化税务文档整理**
-79. **生成财务预测**
-80. **创建风险披露文档**
-81. **自动化审计准备**
-
-#### 人力资源与招聘（10 个）
-
-82. **自动化简历筛选**
-83. **生成面试问题库**
-84. **创建候选人评分卡**
-85. **自动化 offer letter 生成**
-86. **创建员工入职检查清单**
-87. **生成绩效评估模板**
-88. **自动化离职面谈摘要**
-89. **创建培训材料**
-90. **生成组织架构图**
-91. **自动化员工福利沟通**
-
-#### 研究与学习（10 个）
-
-92. **从 PDF 提取关键洞察**
-93. **生成研究论文摘要**
-94. **创建文献综述**
-95. **自动化引用格式化**
-96. **生成学习笔记**
-97. **创建知识图谱**
-98. **自动化播客转录摘要**
-99. **生成学习路径**
-100. **创建闪卡**
-101. **自动化研究问题生成**
-
-### 实现模式
-
-**通用 Skill 结构**：
+### 通用 Skill 结构模板
 
 ```markdown
 ---
-name: task-name
-description: What it does and when to use it
+name: skill-name
+description: 功能说明 + 使用场景 + 触发词
 ---
 
-# Task Name
+# Skill Name
 
-## Purpose
-Clear statement of what this automates
+## 核心功能
+自动化目标的清晰描述
 
-## Prerequisites
-- Required tools
-- Data format expectations
-- Access permissions
+## 工作流步骤
+1. 输入验证
+2. 数据处理
+3. 输出生成
+4. 质量检查
 
-## Workflow Steps
-1. Input validation
-2. Data processing
-3. Output generation
-4. Quality checks
-
-## Code Examples
-```python
-# Reusable script snippets
-```
-
-## Quality Gates
-- Validation criteria
-- Success metrics
+## 质量标准
+✅ 验证标准 1
+✅ 验证标准 2
 ```
 
 ---
@@ -701,209 +463,75 @@ Clear statement of what this automates
 
 ### 投资者用例 1：财报分析自动化
 
-**场景**：
-- 需要分析多家公司的季度财报
-- 提取关键指标和趋势
-- 生成投资建议
+**场景**：分析季度财报，提取关键指标，生成投资建议
 
-**Skills 实现**：
+**Skills 实现精要**：
 
 ```markdown
 ---
 name: earnings-analyzer
-description: Analyze quarterly earnings reports, extract key metrics, identify trends, and generate investment insights
+description: Analyze earnings reports and generate investment insights
 ---
 
 # Earnings Report Analyzer
 
-## Data Sources
-- 10-Q/10-K filings from SEC EDGAR
-- Earnings call transcripts
-- Analyst estimates
+## 数据源
+- SEC EDGAR 10-Q/10-K 文件
+- 财报电话会议记录
+- 分析师预期
 
-## Analysis Framework
+## 分析框架
+1. **财务指标提取**：收入、EPS、利润率、现金流
+2. **趋势分析**：YoY/QoQ 增长、与预期对比、行业对比
+3. **定性分析**：管理层评论、前瞻指引、风险因素
+4. **投资建议**：综合量化和定性数据生成 Buy/Hold/Sell 建议
 
-### 1. Financial Metrics Extraction
-```python
-# scripts/extract_metrics.py
-import pandas as pd
-from sec_edgar_downloader import Downloader
-
-def extract_key_metrics(ticker, period):
-    """
-    Extract revenue, EPS, margins, cash flow
-    """
-    metrics = {
-        'revenue': extract_revenue(filing),
-        'eps': extract_eps(filing),
-        'gross_margin': calculate_margin(filing),
-        'fcf': calculate_fcf(filing)
-    }
-    return metrics
+## 输出格式
+- 执行摘要 | 关键指标仪表板 | 趋势分析
+- 风险评估 | 投资建议 | 目标价格
 ```
 
-### 2. Trend Analysis
-- YoY growth rates
-- QoQ changes
-- Compare to analyst estimates
-- Sector peer comparison
-
-### 3. Qualitative Analysis
-- Management commentary
-- Forward guidance
-- Risk factors
-- Competitive positioning
-
-### 4. Investment Thesis
-```python
-def generate_thesis(metrics, trends, qualitative):
-    """
-    Synthesize quantitative and qualitative data
-    into actionable investment recommendation
-    """
-    # Combine signals
-    # Apply valuation models
-    # Generate buy/hold/sell recommendation
-```
-
-## Output Format
-
-Investment Memo:
-- Executive Summary
-- Key Metrics Dashboard
-- Trend Analysis
-- Risk Assessment
-- Recommendation (Buy/Hold/Sell)
-- Price Target
-- Timeline
-```
-
-**效果**：
-- 之前：每家公司 4-6 小时分析
-- 现在：30 分钟（包括验证）
-- **效率提升：8-12 倍**
+**效率提升**：4-6 小时 → 30 分钟（**8-12 倍**）
 
 ### 投资者用例 2：市场研究综合
 
-**场景**：
-- 跟踪多个数据源（新闻、研报、社交媒体）
-- 识别市场趋势和机会
-- 生成每日市场洞察
+**场景**：跟踪多源数据（新闻、研报、社交媒体），识别趋势，生成每日洞察
 
-**Skills 实现**：
+**Skills 实现精要**：
 
 ```markdown
 ---
 name: market-intelligence
-description: Aggregate and analyze market data from multiple sources, identify trends, and generate daily market intelligence reports
+description: Aggregate market data, identify trends, generate daily intelligence reports
 ---
 
 # Market Intelligence Aggregator
 
-## Data Sources Integration
+## 数据源（20+ 集成）
+- **新闻**: Bloomberg, Reuters, WSJ, FT
+- **研报**: 分析师报告、评级变化、目标价
+- **另类数据**: Twitter 情绪、Reddit 趋势、Google Trends
+- **市场数据**: 实时价格、成交量、波动率
 
-### 1. News Feeds
-```python
-# scripts/news_aggregator.py
-from newsapi import NewsApiClient
-import feedparser
+## 分析管道
+1. **信号检测**: 期权异动、内部交易、空头变化
+2. **情绪分析**: FinBERT 模型分析文本情绪
+3. **趋势识别**: 板块轮动、主题转换、相关性变化
+4. **风险监控**: 波动率飙升、流动性问题、地缘事件
 
-def aggregate_news(topics, sources):
-    """
-    Collect news from Bloomberg, Reuters, WSJ, FT
-    Filter by relevance and sentiment
-    """
-```
+## 每日报告输出
+- 执行摘要（3-5 个关键发展）
+- 板块分析（最佳/最差表现）
+- 主题洞察（新兴趋势）
+- 风险仪表板 + 行动建议
 
-### 2. Research Reports
-- Scrape analyst reports
-- Extract price targets and ratings
-- Track upgrades/downgrades
-
-### 3. Alternative Data
-```python
-# scripts/alt_data.py
-def collect_sentiment():
-    """
-    - Twitter/X financial sentiment
-    - Reddit WallStreetBets trends
-    - Google Trends search volume
-    """
-```
-
-### 4. Market Data
-- Real-time price data
-- Volume analysis
-- Volatility indices
-
-## Analysis Pipeline
-
-1. **Signal Detection**
-   - Unusual options activity
-   - Insider buying/selling
-   - Short interest changes
-   - Institutional flows
-
-2. **Sentiment Analysis**
-   ```python
-   from transformers import pipeline
-
-   sentiment = pipeline("sentiment-analysis",
-                       model="ProsusAI/finbert")
-   ```
-
-3. **Trend Identification**
-   - Sector rotation signals
-   - Macro thematic shifts
-   - Correlation changes
-
-4. **Risk Monitoring**
-   - Volatility spikes
-   - Liquidity concerns
-   - Geopolitical events
-
-## Daily Report Generation
-
-```markdown
-# Market Intelligence Report - [Date]
-
-## Executive Summary
-- 3-5 key market developments
-- Top opportunities
-- Key risks
-
-## Sector Analysis
-- Best/worst performing sectors
-- Notable stock moves
-- Sector rotation signals
-
-## Thematic Insights
-- Emerging trends
-- Macro developments
-- Positioning recommendations
-
-## Risk Dashboard
-- Volatility indicators
-- Sentiment gauges
-- Tail risk metrics
-
-## Action Items
-- Stocks to watch
-- Trades to consider
-- Research priorities
-```
-
-## Automation Schedule
+## 自动化
 ```bash
-# Cron job: Run at 6:30 AM EST daily
-30 6 * * 1-5 python run_market_intel.py --full-report
+# 每日 6:30 AM EST 自动运行
+30 6 * * 1-5 python run_market_intel.py
 ```
 
-**价值**：
-- 整合 20+ 数据源
-- 自动化日常研究工作
-- 识别人工可能错过的信号
-- 节省每天 3-4 小时
+**价值**：整合 20+ 数据源，识别隐藏信号，节省 3-4 小时/天
 
 ### 关键成功因素
 
@@ -933,186 +561,76 @@ def collect_sentiment():
 
 **核心论点**：
 
-> "成功的团队不是有更好的提示词。他们有更好的结构"
+> "成功的团队不是有更好的提示词，而是有更好的结构"
 
-### 问题：我们在进行昂贵的对话
+### 传统提示词工程的困境
 
-**典型 AI 工作流**：
-- 解释你想要什么
-- 粘贴示例
-- 迭代直到有效
-
-**局限性**：
-- 每次对话从零开始
+**"昂贵的对话"问题**：
+- 每次对话从零开始解释需求
 - 最佳实践在聊天结束后消失
-- 没有系统性改进方法
-- 任务复杂时上下文过载
+- 无法系统性改进
+- 复杂任务时上下文过载
 
-> "你不是在构建系统。你是在进行昂贵的对话"
+> "你不是在构建系统，而是在进行昂贵的对话"
 
 ### Skills：工作流即代码（Workflows as Code）
 
-**不同的方法**：
-
-> "如果不是每次都告诉 AI 要做什么，而是记录工作应该如何完成呢？"
+**范式转变**：从"每次告诉 AI 要做什么"到"记录工作应该如何完成"
 
 **Skills 的本质**：
-- 不是提示词
-- 是 Claude 读取和执行的工作流文档
-- 就像 Markdown 文件定义流程
-- 版本控制、可共享、可改进
+- 不是提示词，而是**可执行的工作流文档**
+- Markdown 定义流程，LLM 读取并执行
+- 支持版本控制、团队共享、持续改进
 
-**一个 Skill 可能记录**：
-- 文档创建标准和审批工作流
-- 如何用特定统计测试验证数据分析
-- 带源验证步骤的研究方法论
-- 会议准备检查清单和跟进程序
-- 从创意到分发的内容创建流程
+**Skills 可以记录**：
+- 文档创建标准和审批流程
+- 数据分析的统计验证方法
+- 研究方法论（含源验证步骤）
+- 会议准备和跟进程序
+- 完整的内容创作管道
 
-### 实战对比
+### 实战对比：销售数据分析
 
-#### 传统提示词工程方式
+#### ❌ 传统提示词方式
 
-```
-用户: "帮我分析这份销售数据"
-
-Claude: "好的，我可以帮你。你想关注什么指标？"
-
-用户: "呃，收入、增长率、客户获取成本..."
-
-Claude: "明白了。你想按什么维度分解？"
-
-用户: "按地区和产品类别"
-
-Claude: "好的，让我分析一下..."
-
-[生成初步分析]
-
-用户: "等等，我们公司的增长率应该与去年同期比较"
-
-Claude: "理解了，让我重新分析..."
-
-[再次生成]
-
-用户: "还有，我们通常用 CAC 回收期作为关键指标"
-
-Claude: "好的，让我添加..."
-
-[第三次生成]
-
-用户: "忘了告诉你，我们需要按财季分组，不是日历季度"
-
-Claude: "没问题..."
-
-[第四次生成]
-```
-
-**时间花费**：30-45 分钟
-**质量**：不一致，可能遗漏关键指标
-
-#### 使用 Skills 方式
-
-```markdown
----
-name: sales-analysis
-description: Analyze sales data following company standards. Use when analyzing revenue, growth metrics, or customer acquisition performance.
----
-
-# Sales Analysis Framework
-
-## Standard Metrics
-1. **Revenue Metrics**
-   - Total Revenue (by fiscal quarter)
-   - YoY Growth Rate
-   - QoQ Growth Rate
-   - Revenue per Customer Segment
-
-2. **Customer Acquisition**
-   - CAC (Customer Acquisition Cost)
-   - CAC Payback Period (company standard: 12 months)
-   - LTV:CAC Ratio (target: 3:1)
-
-3. **Growth Metrics**
-   - Net New MRR
-   - Expansion Revenue
-   - Churn Rate
-
-## Breakdown Dimensions
-- Geography (North America, EMEA, APAC)
-- Product Category (Enterprise, SMB, Self-Serve)
-- Customer Segment (New, Expansion, Renewal)
-
-## Time Periods
-- **Default**: Fiscal quarters (Apr-Jun, Jul-Sep, Oct-Dec, Jan-Mar)
-- **Comparison**: YoY same fiscal quarter
-
-## Analysis Workflow
-```python
-def analyze_sales(data):
-    # 1. Data validation
-    validate_data_quality(data)
-
-    # 2. Calculate standard metrics
-    metrics = calculate_metrics(data)
-
-    # 3. Apply breakdowns
-    regional = breakdown_by_geography(metrics)
-    product = breakdown_by_product(metrics)
-
-    # 4. Generate insights
-    insights = identify_trends(metrics, regional, product)
-
-    # 5. Format report
-    return generate_sales_report(insights)
-```
-
-## Quality Checks
-- ✅ All revenue in fiscal quarters
-- ✅ CAC payback period calculated
-- ✅ YoY comparison included
-- ✅ Regional breakdown present
-- ✅ Product category breakdown present
-```
-
-**使用效果**：
-
-```
+```text
 用户: "分析这份销售数据"
+→ 多轮对话澄清需求（指标、维度、时间段等）
+→ 反复修正和重新生成
+→ 可能遗漏关键指标
 
-Claude: [激活 sales-analysis Skill]
+时间：30-45 分钟 | 质量：不一致
+```
 
-正在分析...
+#### ✅ 使用 Skills 方式
 
+**Skill 定义**（sales-analysis）：
+- 标准指标：收入、CAC、增长率、流失率
+- 拆解维度：地区、产品类别、客户细分
+- 时间周期：财务季度，YoY 对比
+- 质量标准：完整性检查清单
+
+**实际执行**：
+
+```bash
+$ claude "分析这份销售数据"
+
+# 自动激活 sales-analysis Skill
 📊 Sales Analysis Report - Q3 FY2025
 
-Revenue Metrics:
-- Total Revenue: $12.5M (↑23% YoY)
-- QoQ Growth: +8%
-- Revenue per Segment:
-  * Enterprise: $8.2M (65.6%)
-  * SMB: $3.1M (24.8%)
-  * Self-Serve: $1.2M (9.6%)
+Revenue: $12.5M (↑23% YoY, +8% QoQ)
+CAC: $8,500 | Payback: 9.2mo ✅ | LTV:CAC: 3.8:1 ✅
 
-Customer Acquisition:
-- CAC: $8,500
-- CAC Payback: 9.2 months ✅ (target: 12mo)
-- LTV:CAC: 3.8:1 ✅ (target: 3:1)
-
-Geographic Breakdown:
-- North America: $7.5M (60%)
-- EMEA: $3.2M (26%)
-- APAC: $1.8M (14%)
+Geographic: NA 60% | EMEA 26% | APAC 14%
+Segments: Enterprise 65.6% | SMB 24.8% | Self-Serve 9.6%
 
 Key Insights:
-1. Enterprise segment driving growth (YoY +31%)
-2. CAC efficiency improving (down from $9,200 last quarter)
-3. APAC showing strongest QoQ growth (+15%)
+1. Enterprise segment driving growth (+31% YoY)
+2. CAC efficiency improving (↓ from $9,200)
+3. APAC strongest QoQ growth (+15%)
 
-完成 ✓
+时间：2-3 分钟 | 质量：一致且完整
 ```
-
-**时间花费**：2-3 分钟
-**质量**：一致、完整、符合标准
 
 ### 为什么结构化工作流更好
 
@@ -1147,161 +665,75 @@ Key Insights:
 
 ### Tyler Folkman 的深入分析
 
-#### 核心差异总结
+#### 核心差异
 
 | 维度 | Claude Skills | MCP |
 |-----|---------------|-----|
 | **定位** | 工作流和专业知识打包 | 外部工具和数据源集成 |
-| **技术复杂度** | 低（Markdown + YAML） | 中高（完整协议栈） |
-| **Token 效率** | 高（渐进式披露） | 低（协议开销大） |
-| **学习曲线** | 平缓（任何人可用） | 陡峭（需要技术背景） |
-| **适用场景** | 重复性任务、SOP | 实时数据访问、外部系统 |
+| **复杂度** | 低（Markdown + YAML） | 高（完整协议栈） |
+| **Token 效率** | 高（按需加载） | 低（始终占用） |
+| **学习曲线** | 平缓 | 陡峭 |
+| **适用场景** | 重复任务、SOP、知识沉淀 | 实时数据、外部 API |
 
-#### 上下文窗口问题深度分析
+#### Token 效率对比
 
-**MCP 的问题**：
+```text
+典型配置 (200K token 窗口):
 
-```
-典型 MCP 配置：
+MCP 方式:
+  4个MCP工具: 34,000 tokens (始终占用)
+  可用工作空间: 141,000 tokens
 
-GitHub MCP: ~15,000 tokens
-Notion MCP: ~8,000 tokens
-Slack MCP: ~6,000 tokens
-Linear MCP: ~5,000 tokens
----------------------------------
-总计: ~34,000 tokens
+Skills 方式:
+  20个Skills元数据: 2,000 tokens
+  激活2个Skills: 4,000 tokens
+  可用工作空间: 169,000 tokens
 
-剩余可用空间: 200,000 - 34,000 = 166,000 tokens
-
-看起来还不错？
-
-实际问题：
-- 对话历史: ~20,000 tokens
-- 系统提示: ~5,000 tokens
-- 实际工作空间: ~141,000 tokens
-
-但是：所有 MCP 工具的描述和模式始终在上下文中
-即使你当前任务不需要它们
-```
-
-**Skills 的优势**：
-
-```
-Skills 配置（同等能力）：
-
-Skills 元数据（20 个 Skills）: ~2,000 tokens
-激活的 Skill（假设 2 个）: ~4,000 tokens
----------------------------------
-总计: ~6,000 tokens
-
-剩余可用空间: 200,000 - 6,000 = 194,000 tokens
-
-实际可用：
-- 对话历史: ~20,000 tokens
-- 系统提示: ~5,000 tokens
-- 实际工作空间: ~169,000 tokens
-
-差异: 169,000 vs 141,000 = +28,000 tokens (20% 提升)
+差异: +28,000 tokens (20% 提升)
 ```
 
 #### 何时使用 Skills vs MCP
 
-**使用 Skills 当**：
+**使用 Skills**：
+- ✅ 重复性工作流（代码审查、文档生成、测试编写）
+- ✅ 领域专业知识（行业最佳实践、公司标准、品牌指南）
+- ✅ 模板化任务（报告、邮件、会议总结）
 
-1. **重复性工作流**
-   - 代码审查标准
-   - 文档生成流程
-   - 数据分析 SOP
-   - 测试编写规范
+**使用 MCP**：
+- ✅ 实时数据访问（数据库查询、API 调用、文件系统）
+- ✅ 双向集成（更新 Jira、创建 GitHub issues、发送 Slack）
+- ✅ 复杂工具函数（图像处理、PDF 操作、加密）
 
-2. **领域专业知识**
-   - 行业特定最佳实践
-   - 公司内部标准
-   - 技术栈指南
-   - 品牌和风格指南
+**组合使用最佳**：
 
-3. **模板化任务**
-   - 报告生成
-   - 邮件回复
-   - 会议总结
-   - 项目文档
+```text
+数据分析工作流示例：
 
-**使用 MCP 当**：
+Skills 定义 "如何分析":
+  ├─ 分析框架和方法论
+  ├─ 标准指标计算逻辑
+  ├─ 报告生成模板
+  └─ 质量检查清单
 
-1. **需要实时数据访问**
-   - 数据库查询
-   - API 调用
-   - 文件系统操作
-   - 外部服务集成
+MCP 提供 "数据和工具":
+  ├─ 数据库 MCP (查询实时数据)
+  ├─ 可视化 MCP (生成图表)
+  └─ 存储 MCP (保存结果)
 
-2. **需要双向集成**
-   - 更新 Jira 工单
-   - 创建 GitHub issues
-   - 发送 Slack 消息
-   - 修改 Notion 页面
-
-3. **需要复杂的工具函数**
-   - 图像处理
-   - PDF 操作
-   - 加密/解密
-   - 网络请求
-
-**组合使用**：
-
-```
-最佳实践：Skills + MCP 互补
-
-示例：数据分析工作流
-
-Skills 部分（data-analysis Skill）：
-- 定义分析框架
-- 标准指标计算方法
-- 报告生成模板
-- 质量检查清单
-
-MCP 部分：
-- 数据库 MCP：查询实时数据
-- 可视化 MCP：生成图表
-- 存储 MCP：保存结果
-
-协同工作：
-1. Skill 定义"如何分析"
-2. MCP 提供"数据访问"和"输出能力"
-3. 结合使用：一致的分析 + 实时数据
+结果: 一致的分析方法 + 实时数据能力
 ```
 
 #### Skills 的限制与应对
 
-**Tyler 指出的限制**：
-
-1. **不能替代实时工具**
-   - Skills 是指令，不是可执行工具
-   - 需要结合代码执行环境
-
-2. **需要编程环境支持**
-   - 依赖 Claude Code 或类似工具
-   - 不适用于纯聊天场景
-
-3. **脚本维护成本**
-   - 复杂 Skills 可能包含脚本
-   - 需要测试和维护
+**限制**：
+1. Skills 是指令非工具（需要代码执行环境）
+2. 依赖 Claude Code 等支持平台
+3. 复杂 Skills 需要脚本维护
 
 **应对策略**：
-
-1. **分层设计**
-   - 简单 Skills：纯 Markdown 指令
-   - 中等 Skills：Markdown + 少量脚本
-   - 复杂 Skills：完整的工具包
-
-2. **与现有工具配合**
-   - Skills 调用 CLI 工具
-   - 利用 Python 生态
-   - 使用 MCP 作为数据层
-
-3. **渐进式采用**
-   - 从简单 Skills 开始
-   - 积累经验后增加复杂度
-   - 根据实际需要决定是否需要脚本
+- **分层设计**：简单用纯 Markdown，复杂时添加脚本
+- **工具配合**：调用 CLI 工具、Python 生态、MCP 数据层
+- **渐进采用**：从简单开始，根据需要增加复杂度
 
 ---
 
@@ -1368,113 +800,67 @@ Templates: `templates/`
 
 #### Description 编写公式
 
-**优秀 description 的三要素**：
+**三要素**：`[功能 What] + [时机 When] + [触发词 Triggers]`
 
+**优秀示例**：
 ```yaml
-description: |
-  [功能 What] + [时机 When] + [触发词 Triggers]
-
-示例 1:
-description: Analyze Excel spreadsheets, create pivot tables, generate charts. Use when working with Excel files, spreadsheets, or analyzing tabular data in .xlsx format.
-
-分解:
-- What: Analyze Excel, create pivot tables, generate charts
-- When: when working with Excel files, spreadsheets, tabular data
-- Triggers: Excel, .xlsx, spreadsheets, pivot tables, charts
-
-示例 2:
-description: Generate conventional commit messages from git diffs. Use when writing commit messages, reviewing staged changes, or committing code.
-
-分解:
-- What: Generate conventional commit messages from git diffs
-- When: writing commit messages, reviewing staged changes, committing
-- Triggers: commit message, git diff, staged changes
+description: Analyze Excel spreadsheets, create pivot tables, generate charts.
+             Use when working with Excel files or analyzing .xlsx data.
+# What: Analyze Excel, pivot tables, charts
+# When: working with Excel files, analyzing data
+# Triggers: Excel, .xlsx, spreadsheets, pivot tables
 ```
 
-**避免的错误**：
-
+**常见错误**：
 ```yaml
-# ❌ 太模糊
-description: Helps with data
-
-# ❌ 缺少触发词
-description: Processes files and generates outputs
-
-# ❌ 过于技术（应该面向任务）
-description: Uses pandas and openpyxl to manipulate Excel files
-
-# ✅ 正确
-description: Analyze Excel spreadsheets, create pivot tables, generate charts. Use when working with Excel files or .xlsx data analysis.
+❌ 太模糊: "Helps with data"
+❌ 缺触发词: "Processes files and generates outputs"
+❌ 过技术: "Uses pandas and openpyxl to manipulate files"
+✅ 正确: "Analyze Excel data, create visualizations. Use for .xlsx analysis."
 ```
 
 ### 3. 脚本组织模式
 
 #### 推荐结构
 
-```
+```bash
 my-skill/
-├── SKILL.md              # 主文档（必需）
-├── README.md             # 用户文档（可选但推荐）
-├── docs/                 # 详细文档
-│   ├── api-reference.md
-│   ├── examples.md
-│   └── troubleshooting.md
-├── scripts/              # 可执行脚本
-│   ├── __init__.py
-│   ├── main.py           # 主入口
-│   ├── helpers.py        # 辅助函数
-│   └── validators.py     # 验证逻辑
-├── templates/            # 模板文件
-│   ├── report.md
-│   └── config.yaml
-└── tests/                # 测试（重要）
-    ├── test_main.py
-    └── test_helpers.py
+├── SKILL.md           # 主文档（必需）
+├── README.md          # 用户文档（推荐）
+├── scripts/           # 可执行脚本
+│   ├── main.py        # 主入口
+│   ├── helpers.py     # 辅助函数
+│   └── validators.py  # 验证逻辑
+├── templates/         # 模板文件
+└── tests/             # 测试（重要）
+    └── test_main.py
 ```
 
 #### 脚本最佳实践
 
 ```python
 #!/usr/bin/env python3
-"""
-Skill Script: [Skill Name]
-Purpose: [Clear purpose statement]
-Usage: python script.py [args]
-"""
+"""Skill Script: 清晰的目的说明"""
+import sys, logging
 
-import sys
-import logging
-from pathlib import Path
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def main(args):
-    """
-    Main entry point with clear error handling
-    """
     try:
-        # Validate inputs
+        # 验证输入
         if not validate_inputs(args):
             logger.error("Invalid inputs")
             sys.exit(1)
 
-        # Process
+        # 处理并验证输出
         result = process(args)
-
-        # Validate outputs
         if not validate_outputs(result):
             logger.error("Output validation failed")
             sys.exit(1)
 
-        # Success
-        logger.info("✓ Completed successfully")
+        logger.info("✓ Completed")
         return result
-
     except Exception as e:
         logger.error(f"✗ Error: {e}")
         sys.exit(1)
@@ -1485,60 +871,28 @@ if __name__ == "__main__":
 
 ### 4. 测试与验证
 
-#### 测试策略
-
 ```python
 # tests/test_skill.py
 import pytest
 from scripts.main import process
 
 def test_basic_functionality():
-    """Test core functionality works"""
-    input_data = "test input"
-    result = process(input_data)
+    """核心功能测试"""
+    result = process("test input")
     assert result is not None
 
 def test_edge_cases():
-    """Test edge cases and error handling"""
-    # Empty input
+    """边界情况和错误处理"""
     with pytest.raises(ValueError):
-        process("")
+        process("")  # 空输入
 
-    # Invalid format
-    with pytest.raises(ValueError):
-        process("invalid format")
-
-def test_output_format():
-    """Test output meets quality standards"""
+def test_output_quality():
+    """输出质量验证"""
     result = process("valid input")
     assert validate_format(result)
-    assert check_quality(result)
-```
-
-#### 集成测试
-
-```bash
-#!/bin/bash
-# test_skill_integration.sh
-
-echo "Testing skill integration..."
-
-# Test 1: Skill discovery
-claude --list-skills | grep "my-skill" || exit 1
-
-# Test 2: Skill activation
-echo "Activate my skill and process test data" | claude > output.txt
-grep "Success" output.txt || exit 1
-
-# Test 3: Output quality
-python scripts/validate_output.py output.txt || exit 1
-
-echo "✓ All integration tests passed"
 ```
 
 ### 5. 版本管理
-
-#### 语义化版本
 
 ```yaml
 # SKILL.md frontmatter
@@ -1549,38 +903,21 @@ description: ...
 ---
 
 # Changelog
-
 ## [1.2.0] - 2025-10-15
 ### Added
-- New validation step for data quality
-- Support for CSV export
-
+- CSV export support
 ### Changed
 - Improved error messages
-- Updated output format
-
 ### Fixed
-- Bug in edge case handling
-
-## [1.1.0] - 2025-09-01
-### Added
-- Initial release with core functionality
+- Edge case handling
 ```
 
-#### Git 工作流
-
+**Git 工作流**：
 ```bash
-# 功能开发
 git checkout -b feature/add-csv-export
-# ... 开发 ...
 git commit -m "feat(csv): add CSV export functionality"
-
-# 发布新版本
-git tag -a v1.2.0 -m "Version 1.2.0: CSV export support"
+git tag -a v1.2.0 -m "Version 1.2.0"
 git push origin v1.2.0
-
-# 团队共享
-git push origin main
 ```
 
 ### 6. 文档编写技巧
@@ -1591,59 +928,36 @@ git push origin main
 ---
 name: skill-name
 version: 1.0.0
-description: Clear, specific description with triggers
+description: 功能说明 + 使用场景 + 触发词
 author: Your Name
-requires: python>=3.8, pandas>=1.0
+requires: python>=3.8
 ---
 
 # Skill Name
 
-## Quick Start
+## 快速开始
 ```bash
-# Fastest way to use this skill
 python scripts/main.py input.txt
 ```
 
-## What This Does
-1-2 sentences explaining the purpose
+## 功能说明
+1-2 句话说明目的
 
-## When to Use
-- Scenario 1
-- Scenario 2
+## 使用场景
+- 场景 1
+- 场景 2
 
-## Prerequisites
-- Tool 1: Why needed
-- Tool 2: Installation command
+## 前置要求
+- Tool 1: 安装命令
 
-## Usage
-
-### Basic Example
+## 使用示例
 ```python
-# Minimal working example
+# 基本示例
 ```
 
-### Advanced Example
-```python
-# More complex use case
-```
-
-## Configuration
-```yaml
-# config.yaml example
-```
-
-## Troubleshooting
-
-### Issue 1
-**Symptom**: What you see
-**Solution**: How to fix
-
-### Issue 2
-**Symptom**: What you see
-**Solution**: How to fix
-
-## API Reference
-For detailed API, see [docs/api-reference.md](docs/api-reference.md)
+## 故障排除
+**问题**: 症状描述
+**解决**: 修复方法
 ```
 
 ---
@@ -1657,263 +971,124 @@ For detailed API, see [docs/api-reference.md](docs/api-reference.md)
 **Simon Willison**：
 > "我期待看到 Skills 的寒武纪大爆发，这将使今年的 MCP 热潮显得微不足道"
 
-**预期发展**：
+**发展时间线**：
 
-**短期（6 个月）**：
-- 官方 Skills 仓库达到 100+ Skills
-- 社区 Skills 集合达到 500+ Skills
-- 主要开发工具集成 Skills 支持
-
-**中期（1 年）**：
-- Skills 市场和评分系统
-- Skills 发现和推荐引擎
-- 跨平台 Skills 标准
-
-**长期（2 年+）**：
-- Skills 成为 AI 工作流的标准模式
-- 企业级 Skills 管理平台
-- Skills 即服务（Skills-as-a-Service）
+| 时间 | 里程碑 |
+|------|--------|
+| **短期（6月）** | 官方 100+ Skills、社区 500+ Skills、主流工具集成 |
+| **中期（1年）** | Skills 市场、评分系统、发现引擎、跨平台标准 |
+| **长期（2年+）** | AI 工作流标准、企业管理平台、Skills-as-a-Service |
 
 #### 2. 技术演进方向
 
 **自动化 Skill 创建**：
-```
+```text
 用户: "我总是这样做这个任务..."
-
-Claude: "我注意到这是一个重复的模式。要我为你创建一个 Skill 吗？"
-
-用户: "好的"
-
-Claude: [分析工作流]
-        [生成 SKILL.md]
-        [创建脚本]
-        [测试验证]
-
-"Skill 'task-name' 已创建并测试。下次你可以直接说'run task-name'"
+Claude: "检测到重复模式，要创建 Skill 吗？"
+→ 分析工作流 → 生成 SKILL.md → 测试验证
+→ "Skill 'task-name' 已创建"
 ```
 
-**Skills 组合和编排**：
+**Skills 组合编排**：
 ```yaml
-# 复杂工作流：组合多个 Skills
 ---
 name: content-pipeline
-description: Complete content creation pipeline
 workflow:
-  - research: use research-skill
-  - outline: use outline-skill
-  - draft: use writing-skill
-  - optimize: use seo-skill
-  - publish: use publishing-skill
+  - research → outline → draft → seo-optimize → publish
 ---
 ```
 
-**智能 Skill 推荐**：
-```
-Claude: "我注意到你经常手动做这个任务。社区有一个 'task-automator' Skill
-       可以自动化这个流程。要安装吗？"
-
-用户: "显示详情"
-
-Claude: [展示 Skill 信息]
-       - 作者: Community Expert
-       - 评分: 4.8/5 (234 reviews)
-       - 使用次数: 15,000+
-       - 节省时间: 平均 30 分钟/次
-
-"点击安装？"
+**智能推荐**：
+```text
+Claude: "社区有 'task-automator' Skill 可自动化此任务"
+       ⭐ 4.8/5 (234 评价) | 15K+ 使用 | 节省 30 分钟
 ```
 
 #### 3. 企业采用趋势
 
-**专业领域 Skills 包**：
-
-```
-金融行业包:
-├── financial-modeling/
-├── risk-analysis/
-├── compliance-check/
-├── earnings-analysis/
-└── market-research/
-
-医疗行业包:
-├── clinical-notes/
-├── diagnosis-assistant/
-├── literature-review/
-├── patient-communication/
-└── research-protocol/
-
-法律行业包:
-├── contract-review/
-├── case-research/
-├── brief-writing/
-├── compliance-audit/
-└── due-diligence/
+**行业专业 Skills 包**：
+```bash
+金融: financial-modeling, risk-analysis, compliance-check
+医疗: clinical-notes, diagnosis-assistant, literature-review
+法律: contract-review, case-research, compliance-audit
 ```
 
-**企业内部 Skills 平台**：
-
-```
-公司 Skills 管理系统:
-
-1. Skills 仓库
-   - 版本控制
-   - 权限管理
-   - 审批流程
-
-2. Skills 市场
-   - 内部共享
-   - 评分系统
-   - 使用分析
-
-3. Skills 治理
-   - 质量标准
-   - 安全审计
-   - 合规性检查
-
-4. Skills 分析
-   - 使用统计
-   - 效率指标
-   - ROI 追踪
+**企业 Skills 平台**：
+```text
+Skills 仓库: 版本控制、权限管理、审批流程
+Skills 市场: 内部共享、评分系统、使用分析
+Skills 治理: 质量标准、安全审计、合规检查
+Skills 分析: 使用统计、效率指标、ROI 追踪
 ```
 
-#### 4. 与其他技术的整合
+#### 4. 与其他技术整合
 
-**Skills + MCP 深度融合**：
-
-```markdown
+**Skills + MCP**：
+```yaml
 ---
 name: integrated-workflow
-description: Combines Skills knowledge with MCP tools
 mcp-dependencies:
-  - database-mcp: for data access
-  - slack-mcp: for notifications
+  - database-mcp  # 数据访问
+  - slack-mcp     # 通知
 ---
-
-# Integrated Workflow
-
-## Process
-1. Use internal knowledge (Skill) to plan analysis
-2. Access data via database-mcp (MCP)
-3. Apply analysis framework (Skill)
-4. Notify team via slack-mcp (MCP)
+# Skill 定义方法论，MCP 提供工具和数据
 ```
 
-**Skills + Agentic AI**：
-
-```
-Multi-Agent 系统架构:
-
-主代理:
-- 任务分解
-- 代理协调
-
-专业代理（每个有专门 Skills）:
-- Research Agent (research-skills)
-- Analysis Agent (analysis-skills)
-- Writing Agent (writing-skills)
-- QA Agent (testing-skills)
-
-协作模式:
-1. 主代理接收任务
-2. 激活相关专业代理
-3. 每个代理使用其 Skills
-4. 结果汇总和整合
+**Skills + Multi-Agent**：
+```text
+主代理 → 任务分解 → 专业代理（各带 Skills）
+  ├─ Research Agent (research-skills)
+  ├─ Analysis Agent (analysis-skills)
+  └─ Writing Agent (writing-skills)
+→ 结果汇总整合
 ```
 
 ### 社区建议
 
 #### 对开发者
 
-**Patrick McGuinness**：
-> "从小处着手，从你自己最重复的任务开始创建 Skills"
+**Patrick McGuinness**：从最重复的任务开始
 
-**具体建议**：
-1. 识别你每周做 3 次以上的任务
-2. 为最简单的任务创建第一个 Skill
+**行动步骤**：
+1. 识别每周重复 3+ 次的任务
+2. 为最简单的创建第一个 Skill
 3. 测试、迭代、改进
-4. 逐步扩展到更复杂的任务
-5. 与团队分享成功的 Skills
+4. 逐步扩展到复杂任务
+5. 与团队分享成功案例
 
 #### 对团队
 
-**Varun Bhanot**：
-> "不要把 AI 当作智能搜索框。构建系统"
+**Varun Bhanot**：不要把 AI 当搜索框，要构建系统
 
-**团队采用路线图**：
+**采用路线图**：
 
-```
-第一阶段（1 个月）：
-- 识别高价值重复任务
-- 创建 3-5 个核心 Skills
-- 团队培训和入职
-
-第二阶段（3 个月）：
-- 扩展到 15-20 个 Skills
-- 建立 Skills 开发流程
-- 收集使用数据和反馈
-
-第三阶段（6 个月）：
-- 完整的 Skills 库（50+）
-- 自动化关键工作流
-- 量化效率提升
-
-持续改进：
-- 定期审查和更新 Skills
-- 共享最佳实践
-- 庆祝成功案例
-```
+| 阶段 | 时间 | 目标 |
+|------|------|------|
+| **第一阶段** | 1个月 | 3-5 个核心 Skills + 团队培训 |
+| **第二阶段** | 3个月 | 15-20 个 Skills + 开发流程 |
+| **第三阶段** | 6个月 | 50+ Skills 库 + 量化提升 |
+| **持续改进** | 长期 | 定期审查 + 分享最佳实践 |
 
 #### 对企业
 
-**Tyler Folkman**：
-> "Skills 和 Plugins 可能成为 AI 的'应用商店'"
+**Tyler Folkman**：Skills 可能成为 AI 的"应用商店"
 
-**企业战略建议**：
-
-1. **将 Skills 视为知识资产**
-   - 投资于 Skills 开发
-   - 建立质量标准
-   - 保护知识产权
-
-2. **建立 Skills 卓越中心**
-   - 专门团队管理 Skills
-   - 培训和支持
-   - 持续创新
-
-3. **衡量商业影响**
-   - 时间节省
-   - 质量改进
-   - 员工满意度
-   - ROI 计算
-
-4. **培养 Skills 文化**
-   - 鼓励贡献
-   - 认可创新者
-   - 分享成功故事
+**战略要点**：
+1. **视为知识资产** - 投资开发、质量标准、知识产权
+2. **建立卓越中心** - 专门团队、培训支持、持续创新
+3. **衡量商业价值** - 时间节省、质量改进、ROI 计算
+4. **培养 Skills 文化** - 鼓励贡献、认可创新、分享故事
 
 ### 开放性问题
 
 **社区讨论的关键问题**：
 
-1. **Skills 标准化**
-   - 需要跨平台标准吗？
-   - 谁来定义最佳实践？
-   - 如何保证质量？
-
-2. **Skills 安全性**
-   - 如何验证 Skills 安全？
-   - 恶意 Skills 的风险？
-   - 沙箱和权限模型？
-
-3. **Skills 可发现性**
-   - 如何帮助用户找到合适的 Skills？
-   - 搜索和推荐算法？
-   - 社区策展和评分？
-
-4. **Skills 经济学**
-   - 付费 Skills 市场？
-   - 创作者激励机制？
-   - 企业授权模式？
+| 问题领域 | 核心挑战 |
+|---------|----------|
+| **标准化** | 跨平台标准？最佳实践由谁定义？质量保证机制？ |
+| **安全性** | 如何验证 Skills 安全？恶意 Skills 风险？沙箱模型？ |
+| **可发现性** | 如何帮助用户找到合适 Skills？推荐算法？社区策展？ |
+| **经济学** | 付费市场？创作者激励？企业授权模式？ |
 
 ---
 
@@ -1921,50 +1096,30 @@ Multi-Agent 系统架构:
 
 ### Substack 社区的核心洞察
 
-1. **Skills 可能比 MCP 更重要**
-   - 更简单、更易用
-   - 更好的 token 效率
-   - 更低的技术门槛
+| 维度 | 关键发现 |
+|------|----------|
+| **技术优势** | 比 MCP 更简单、Token 效率更高、技术门槛更低 |
+| **解决痛点** | 渐进式披露，仅加载相关信息，提升 20% 工作空间 |
+| **工作方式** | 结构化工作流胜过提示词工程，知识持久化、可复制 |
+| **效率提升** | SEO: 6倍 \| 投资分析: 8-12倍 \| 数据分析: 15倍 |
+| **生态前景** | 预期"寒武纪大爆发"，可能成为 AI 工作流标准 |
 
-2. **上下文窗口问题的最佳解决方案**
-   - 渐进式披露机制
-   - 仅加载相关信息
-   - 大幅提升可用空间
+### 行动指南
 
-3. **结构化工作流胜过提示词工程**
-   - 知识持久化
-   - 一致性和可重复性
-   - 团队协作和扩展
+**🚀 立即开始**（本周）
+- 识别 1-3 个最重复的任务
+- 创建第一个简单 Skill（纯 Markdown）
+- 测试、迭代、记录效果
 
-4. **真实世界的应用价值**
-   - SEO 工作流：2 小时 → 20 分钟
-   - 投资分析：6 小时 → 30 分钟
-   - 数据分析：45 分钟 → 3 分钟
+**📈 持续优化**（1-3 个月）
+- 收集使用反馈，量化效率提升
+- 优化 Skills 质量，扩展到 10-20 个
+- 建立团队 Skills 开发流程
 
-5. **生态系统快速发展**
-   - 社区热情高涨
-   - 预期"寒武纪大爆发"
-   - 可能成为 AI 工作流标准
-
-### 实践建议
-
-**立即行动**：
-1. 识别你最重复的任务
-2. 创建第一个简单 Skill
-3. 测试和迭代
-4. 与团队分享
-
-**持续改进**：
-1. 收集使用反馈
-2. 优化 Skills 质量
-3. 扩展 Skills 库
-4. 量化效率提升
-
-**长期战略**：
-1. 将 Skills 作为知识资产
-2. 建立团队 Skills 文化
-3. 投资于 Skills 基础设施
-4. 参与社区生态
+**🎯 长期战略**（6+ 个月）
+- 将 Skills 作为核心知识资产
+- 建立企业 Skills 文化和平台
+- 参与社区生态，分享最佳实践
 
 ### 关键资源
 
