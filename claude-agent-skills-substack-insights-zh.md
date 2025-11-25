@@ -30,7 +30,7 @@
 **核心论点**：
 
 1. **简洁性是优势**
-   - MCP 是完整的协议规范（hosts、clients、servers、resources、prompts、tools、sampling等）
+   - MCP 是完整的协议规范（hosts、clients、servers、resources、prompts、tools、sampling 等）
    - Skills 只是 Markdown + 少量 YAML 元数据 + 可选脚本
    - "把难的部分外包给 LLM 工具链和计算环境"
 
@@ -109,7 +109,7 @@
 | 上下文模式 | 始终加载 | 按需加载 |
 | Token 效率 | 中等 | 高 |
 
-**Wyndo 的SEO 案例**：
+**Wyndo 的 SEO 案例**：
 
 **问题**：
 - 每次优化博客文章需要 2 小时
@@ -174,7 +174,7 @@ Skills 仅需：
 > "Skills 机制完全依赖于模型访问文件系统、导航工具和执行命令的能力。这是一个重大依赖，但解锁了惊人的新能力"
 
 **历史背景**：
-- ChatGPT Code Interpreter（2023年初）首创此模式
+- ChatGPT Code Interpreter（2023 年初）首创此模式
 - 现在扩展到本地机器：Cursor、Claude Code、Codex CLI、Gemini CLI
 
 **为什么这很重要**：
@@ -898,7 +898,6 @@ def collect_sentiment():
 # Cron job: Run at 6:30 AM EST daily
 30 6 * * 1-5 python run_market_intel.py --full-report
 ```
-```
 
 **价值**：
 - 整合 20+ 数据源
@@ -1375,7 +1374,7 @@ Templates: `templates/`
 description: |
   [功能 What] + [时机 When] + [触发词 Triggers]
 
-示例1:
+示例 1:
 description: Analyze Excel spreadsheets, create pivot tables, generate charts. Use when working with Excel files, spreadsheets, or analyzing tabular data in .xlsx format.
 
 分解:
@@ -1383,7 +1382,7 @@ description: Analyze Excel spreadsheets, create pivot tables, generate charts. U
 - When: when working with Excel files, spreadsheets, tabular data
 - Triggers: Excel, .xlsx, spreadsheets, pivot tables, charts
 
-示例2:
+示例 2:
 description: Generate conventional commit messages from git diffs. Use when writing commit messages, reviewing staged changes, or committing code.
 
 分解:
@@ -1990,4 +1989,4 @@ Multi-Agent 系统架构:
 
 *信息来源：Simon Willison、Tyler Folkman、Wyndo、Patrick McGuinness、Varun Bhanot、Yan Gao、Divyanshi Sharma 等专家的 Substack 文章*
 
-*最后更新：2025年11月*
+*最后更新：2025 年 11 月*
