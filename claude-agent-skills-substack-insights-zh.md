@@ -743,222 +743,676 @@ MCP 提供 "数据和工具":
 
 #### 单一职责原则
 
-**正确**：
-```
+每个 Skill 应该专注于一个明确的任务，避免功能过于宽泛。
+
+**✅ 正确示例**：
+
+```bash
 skills/
 ├── git-commit-message/  # 仅生成提交消息
-├── code-review/        # 仅代码审查
-└── test-generation/    # 仅测试生成
+├── code-review/         # 仅代码审查
+└── test-generation/     # 仅测试生成
 ```
 
-**错误**：
-```
+**❌ 错误示例**：
+
+```bash
 skills/
-└── dev-helper/  # 包含所有开发任务（太宽泛）
+└── dev-helper/  # 包含所有开发任务（太宽泛，职责不清）
 ```
 
 #### 渐进式复杂度
 
-**推荐发展路径**：
+根据任务复杂度，逐步增强 Skill 的实现方式。
 
-```
-Level 1: 纯指令 Skill
+**📊 推荐发展路径**：
+
+**Level 1: 纯指令 Skill**
+```markdown
 ---
 name: simple-task
 ---
 # Simple Task
 Do X, then Y, then Z.
+```
 
-Level 2: 指令 + 示例
+**Level 2: 指令 + 示例**
+```markdown
 ---
 name: intermediate-task
 ---
 # Intermediate Task
-Do X:
-```example
-code here
+Do X following this pattern:
+
+\`\`\`example
+code example here
+\`\`\`
 ```
 
-Level 3: 指令 + 脚本
+**Level 3: 指令 + 脚本**
+```markdown
 ---
 name: advanced-task
 ---
 # Advanced Task
-Run: `python scripts/helper.py`
+Execute: `python scripts/helper.py`
+```
 
-Level 4: 完整工具包
+**Level 4: 完整工具包**
+```markdown
 ---
 name: expert-task
 ---
 # Expert Task
-See [reference.md](reference.md)
-Scripts: `scripts/`
-Templates: `templates/`
+- Documentation: [reference.md](reference.md)
+- Scripts: `scripts/`
+- Templates: `templates/`
 ```
 
 ### 2. 元数据编写技巧
 
 #### Description 编写公式
 
-**三要素**：`[功能 What] + [时机 When] + [触发词 Triggers]`
+好的 description 应该包含三个核心要素：
 
-**优秀示例**：
+**📝 三要素公式**：`[功能 What] + [时机 When] + [触发词 Triggers]`
+
+**✅ 优秀示例**：
+
 ```yaml
 description: Analyze Excel spreadsheets, create pivot tables, generate charts.
              Use when working with Excel files or analyzing .xlsx data.
-# What: Analyze Excel, pivot tables, charts
-# When: working with Excel files, analyzing data
-# Triggers: Excel, .xlsx, spreadsheets, pivot tables
+
+# 分析：
+# - What: Analyze Excel, pivot tables, charts
+# - When: working with Excel files, analyzing data
+# - Triggers: Excel, .xlsx, spreadsheets, pivot tables
 ```
 
-**常见错误**：
+**❌ 常见错误与改进**：
+
+| 错误类型 | 示例 | 问题 |
+|---------|------|------|
+| 太模糊 | "Helps with data" | 缺乏具体功能说明 |
+| 缺触发词 | "Processes files and generates outputs" | 无法自动识别使用场景 |
+| 过度技术 | "Uses pandas and openpyxl to manipulate files" | 关注实现而非功能 |
+
+**✅ 正确写法**：
 ```yaml
-❌ 太模糊: "Helps with data"
-❌ 缺触发词: "Processes files and generates outputs"
-❌ 过技术: "Uses pandas and openpyxl to manipulate files"
-✅ 正确: "Analyze Excel data, create visualizations. Use for .xlsx analysis."
+description: Analyze Excel data, create visualizations. Use for .xlsx analysis.
 ```
 
 ### 3. 脚本组织模式
 
-#### 推荐结构
+#### 📁 推荐目录结构
 
 ```bash
 my-skill/
-├── SKILL.md           # 主文档（必需）
-├── README.md          # 用户文档（推荐）
-├── scripts/           # 可执行脚本
-│   ├── main.py        # 主入口
-│   ├── helpers.py     # 辅助函数
-│   └── validators.py  # 验证逻辑
-├── templates/         # 模板文件
-└── tests/             # 测试（重要）
-    └── test_main.py
+├── SKILL.md              # 主文档（必需）
+├── README.md             # 用户文档（推荐）
+│
+├── scripts/              # 可执行脚本
+│   ├── main.py           # 主入口
+│   ├── helpers.py        # 辅助函数
+│   └── validators.py     # 验证逻辑
+│
+├── templates/            # 模板文件
+│   └── output.template   # 输出模板
+│
+└── tests/                # 测试（重要）
+    └── test_main.py      # 主测试文件
 ```
 
-#### 脚本最佳实践
+**📋 文件说明**：
+
+| 文件/目录 | 优先级 | 说明 |
+|----------|--------|------|
+| `SKILL.md` | 必需 | Skill 核心定义和指令 |
+| `README.md` | 推荐 | 用户文档和使用说明 |
+| `scripts/` | 可选 | 复杂逻辑需要时添加 |
+| `templates/` | 可选 | 需要格式化输出时使用 |
+| `tests/` | 重要 | 确保 Skill 质量和可靠性 |
+
+#### 🛠️ 脚本最佳实践
+
+**标准脚本模板**：
 
 ```python
 #!/usr/bin/env python3
-"""Skill Script: 清晰的目的说明"""
-import sys, logging
+"""
+Skill Script: 清晰的目的说明
 
-logging.basicConfig(level=logging.INFO)
+用途：描述脚本的具体功能
+输入：说明期望的输入参数
+输出：说明生成的输出格式
+"""
+import sys
+import logging
+
+# 配置日志
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(levelname)s: %(message)s'
+)
 logger = logging.getLogger(__name__)
 
+def validate_inputs(args):
+    """验证输入参数的有效性"""
+    # 实现输入验证逻辑
+    return True
+
+def process(args):
+    """核心处理逻辑"""
+    # 实现主要功能
+    return result
+
+def validate_outputs(result):
+    """验证输出结果的有效性"""
+    # 实现输出验证逻辑
+    return True
+
 def main(args):
+    """主函数：协调整个执行流程"""
     try:
-        # 验证输入
+        # 1. 验证输入
         if not validate_inputs(args):
-            logger.error("Invalid inputs")
+            logger.error("❌ Invalid inputs")
             sys.exit(1)
 
-        # 处理并验证输出
+        # 2. 执行处理
         result = process(args)
+        
+        # 3. 验证输出
         if not validate_outputs(result):
-            logger.error("Output validation failed")
+            logger.error("❌ Output validation failed")
             sys.exit(1)
 
-        logger.info("✓ Completed")
+        logger.info("✅ Completed successfully")
         return result
+        
     except Exception as e:
-        logger.error(f"✗ Error: {e}")
+        logger.error(f"❌ Error: {e}")
         sys.exit(1)
 
 if __name__ == "__main__":
     main(sys.argv[1:])
 ```
 
+**🎯 关键要点**：
+- ✅ 清晰的文档字符串说明用途
+- ✅ 完善的日志记录（INFO/ERROR）
+- ✅ 输入和输出验证
+- ✅ 统一的错误处理
+- ✅ 友好的状态提示（✅/❌）
+
 ### 4. 测试与验证
+
+#### 🧪 测试策略
+
+确保 Skill 的可靠性和质量，需要覆盖三个层面的测试。
+
+**测试金字塔**：
+
+```text
+        /\
+       /  \      单元测试（Unit Tests）
+      /____\     - 测试单个函数和模块
+     /      \    
+    /  集成  \   集成测试（Integration Tests）
+   /   测试   \  - 测试组件间协作
+  /___________\ 
+ /             \ 
+/   端到端测试   \ 端到端测试（E2E Tests）
+/_______________\ - 测试完整工作流
+```
+
+#### 📝 测试代码示例
 
 ```python
 # tests/test_skill.py
 import pytest
-from scripts.main import process
+from scripts.main import process, validate_inputs, validate_outputs
+
+# ========== 单元测试 ==========
 
 def test_basic_functionality():
-    """核心功能测试"""
+    """测试核心功能是否正常工作"""
     result = process("test input")
     assert result is not None
+    assert len(result) > 0
+
+def test_input_validation():
+    """测试输入验证逻辑"""
+    assert validate_inputs(["valid", "input"]) == True
+    assert validate_inputs([]) == False
+    assert validate_inputs(None) == False
+
+# ========== 边界情况测试 ==========
 
 def test_edge_cases():
-    """边界情况和错误处理"""
+    """测试边界情况和错误处理"""
+    # 空输入
     with pytest.raises(ValueError):
-        process("")  # 空输入
+        process("")
+    
+    # 超长输入
+    with pytest.raises(ValueError):
+        process("x" * 10000)
+    
+    # 特殊字符
+    result = process("test@#$%")
+    assert result is not None
+
+# ========== 输出质量测试 ==========
 
 def test_output_quality():
-    """输出质量验证"""
+    """验证输出格式和质量"""
     result = process("valid input")
-    assert validate_format(result)
+    
+    # 格式验证
+    assert validate_outputs(result)
+    
+    # 内容验证
+    assert "expected_key" in result
+    assert result["expected_key"] is not None
+
+# ========== 集成测试 ==========
+
+def test_full_workflow():
+    """测试完整工作流程"""
+    # 准备测试数据
+    test_input = "integration test data"
+    
+    # 执行完整流程
+    result = process(test_input)
+    
+    # 验证结果
+    assert result["status"] == "success"
+    assert result["data"] is not None
+
+# ========== 性能测试 ==========
+
+def test_performance():
+    """测试执行性能"""
+    import time
+    
+    start = time.time()
+    result = process("performance test")
+    duration = time.time() - start
+    
+    # 应该在1秒内完成
+    assert duration < 1.0
+```
+
+#### ✅ 测试检查清单
+
+运行测试前确保：
+
+- [ ] 所有核心功能都有测试覆盖
+- [ ] 边界情况和错误处理已测试
+- [ ] 输出格式和质量已验证
+- [ ] 测试数据准备充分
+- [ ] 测试可以独立运行（无依赖）
+- [ ] 测试命名清晰、注释完整
+
+**运行测试**：
+
+```bash
+# 运行所有测试
+pytest tests/
+
+# 运行特定测试文件
+pytest tests/test_skill.py
+
+# 显示详细输出
+pytest tests/ -v
+
+# 显示测试覆盖率
+pytest tests/ --cov=scripts
 ```
 
 ### 5. 版本管理
 
+#### 📌 语义化版本控制
+
+遵循 [Semantic Versioning](https://semver.org/) 规范：`MAJOR.MINOR.PATCH`
+
+**版本号规则**：
+
+| 类型 | 说明 | 示例 |
+|------|------|------|
+| **MAJOR** | 不兼容的 API 变更 | 1.0.0 → 2.0.0 |
+| **MINOR** | 向后兼容的功能新增 | 1.0.0 → 1.1.0 |
+| **PATCH** | 向后兼容的问题修复 | 1.0.0 → 1.0.1 |
+
+#### 📄 Skill 版本信息
+
+在 `SKILL.md` 文件头部添加版本信息：
+
 ```yaml
-# SKILL.md frontmatter
 ---
 name: my-skill
 version: 1.2.0
-description: ...
+description: 功能描述
+author: Your Name
+created: 2025-10-01
+updated: 2025-10-15
+requires: 
+  - python: ">=3.8"
+  - dependencies: "pandas>=2.0.0"
 ---
-
-# Changelog
-## [1.2.0] - 2025-10-15
-### Added
-- CSV export support
-### Changed
-- Improved error messages
-### Fixed
-- Edge case handling
 ```
 
-**Git 工作流**：
+#### 📋 变更日志（Changelog）
+
+在 Skill 文档末尾维护详细的变更记录：
+
+```markdown
+## 变更历史
+
+### [1.2.0] - 2025-10-15
+
+#### ✨ Added（新增）
+- CSV export support
+- Batch processing mode
+- Progress bar for long operations
+
+#### 🔄 Changed（变更）
+- Improved error messages with actionable suggestions
+- Updated documentation with more examples
+- Optimized performance for large files
+
+#### 🐛 Fixed（修复）
+- Edge case handling for empty inputs
+- Unicode encoding issues
+- Memory leak in batch mode
+
+#### 🗑️ Deprecated（弃用）
+- Old `--legacy-mode` flag (use `--compatible` instead)
+
+---
+
+### [1.1.0] - 2025-09-20
+...
+```
+
+#### 🔄 Git 工作流
+
+**功能开发流程**：
+
 ```bash
+# 1. 创建功能分支
 git checkout -b feature/add-csv-export
-git commit -m "feat(csv): add CSV export functionality"
-git tag -a v1.2.0 -m "Version 1.2.0"
+
+# 2. 开发并提交（使用约定式提交）
+git add .
+git commit -m "feat(csv): add CSV export functionality
+
+- Add export_to_csv() function
+- Add --format csv option
+- Update documentation"
+
+# 3. 更新版本号（SKILL.md 中的 version 字段）
+# version: 1.1.0 → 1.2.0
+
+# 4. 创建版本标签
+git tag -a v1.2.0 -m "Release version 1.2.0
+
+New Features:
+- CSV export support
+- Batch processing mode
+
+Bug Fixes:
+- Edge case handling
+"
+
+# 5. 推送代码和标签
+git push origin feature/add-csv-export
 git push origin v1.2.0
+```
+
+#### 💬 约定式提交（Conventional Commits）
+
+使用规范化的提交消息格式：
+
+```text
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+```
+
+**提交类型**：
+
+| Type | 说明 | 版本影响 |
+|------|------|---------|
+| `feat` | 新功能 | MINOR ↑ |
+| `fix` | 修复 Bug | PATCH ↑ |
+| `docs` | 文档变更 | 无 |
+| `style` | 代码格式调整 | 无 |
+| `refactor` | 重构（无功能变化） | 无 |
+| `perf` | 性能优化 | PATCH ↑ |
+| `test` | 测试相关 | 无 |
+| `chore` | 构建/工具变更 | 无 |
+
+**示例**：
+
+```bash
+# 新功能
+git commit -m "feat(export): add PDF export support"
+
+# Bug 修复
+git commit -m "fix(parser): handle empty input correctly"
+
+# 破坏性变更（MAJOR 版本）
+git commit -m "feat(api)!: redesign core API
+
+BREAKING CHANGE: Main function signature changed from 
+process(input) to process(input, options)"
 ```
 
 ### 6. 文档编写技巧
 
-#### SKILL.md 模板
+#### 📚 SKILL.md 标准模板
+
+优秀的 Skill 文档应该让用户快速理解功能、上手使用并解决问题。
+
+**完整模板结构**：
 
 ```markdown
 ---
 name: skill-name
 version: 1.0.0
-description: 功能说明 + 使用场景 + 触发词
+description: 简洁的功能说明 + 使用场景 + 关键触发词
 author: Your Name
-requires: python>=3.8
+created: 2025-10-01
+updated: 2025-10-15
+requires: 
+  - python: ">=3.8"
+  - packages: "requests, pandas"
+tags: [automation, data-processing, productivity]
 ---
 
 # Skill Name
 
-## 快速开始
-```bash
+> 一句话概述：这个 Skill 解决什么问题
+
+## 🚀 快速开始
+
+最简单的使用示例，让用户立即上手：
+
+\`\`\`bash
+# 基本用法
 python scripts/main.py input.txt
-```
 
-## 功能说明
-1-2 句话说明目的
+# 或者直接调用
+claude "使用 skill-name 处理这个文件"
+\`\`\`
 
-## 使用场景
-- 场景 1
-- 场景 2
+## 📖 功能说明
 
-## 前置要求
-- Tool 1: 安装命令
+用 1-2 段话清晰说明：
+- 这个 Skill 做什么
+- 为什么需要它
+- 它如何帮助你的工作流
 
-## 使用示例
-```python
-# 基本示例
-```
+## 💡 使用场景
 
-## 故障排除
-**问题**: 症状描述
-**解决**: 修复方法
-```
+具体的应用场景示例：
+
+- **场景 1**: 当你需要...时，自动执行...
+- **场景 2**: 处理...类型的任务，生成...
+- **场景 3**: 将...转换为...格式
+
+## ⚙️ 前置要求
+
+**必需工具**：
+\`\`\`bash
+# Python 3.8+
+python --version
+
+# 安装依赖
+pip install -r requirements.txt
+\`\`\`
+
+**可选工具**（增强功能）：
+- Tool A: 用于...功能
+- Tool B: 提升...性能
+
+## 📝 使用示例
+
+### 示例 1：基本用法
+
+\`\`\`bash
+python scripts/main.py input.txt --output result.txt
+\`\`\`
+
+**输入**：
+\`\`\`text
+sample input data
+\`\`\`
+
+**输出**：
+\`\`\`text
+processed output data
+\`\`\`
+
+### 示例 2：高级选项
+
+\`\`\`bash
+python scripts/main.py input.txt \
+  --format json \
+  --validate \
+  --verbose
+\`\`\`
+
+## 🎯 工作流程
+
+说明 Skill 的执行步骤：
+
+1. **输入验证** - 检查输入格式和完整性
+2. **数据处理** - 执行核心转换逻辑
+3. **质量检查** - 验证输出结果
+4. **生成报告** - 创建最终输出
+
+## ⚡ 选项参数
+
+| 参数 | 类型 | 默认值 | 说明 |
+|-----|------|--------|------|
+| `--input` | string | - | 输入文件路径（必需） |
+| `--output` | string | `output.txt` | 输出文件路径 |
+| `--format` | string | `text` | 输出格式（text/json/csv） |
+| `--validate` | flag | false | 启用严格验证 |
+| `--verbose` | flag | false | 显示详细日志 |
+
+## 🔧 配置
+
+可选的配置文件示例（`config.yaml`）：
+
+\`\`\`yaml
+# 基本设置
+output_format: json
+enable_validation: true
+
+# 高级设置
+max_file_size: 10MB
+timeout: 30s
+\`\`\`
+
+## ❗ 故障排除
+
+### 问题 1: 错误消息 "XYZ"
+
+**症状**：执行时出现 "XYZ" 错误
+
+**原因**：通常是因为...
+
+**解决方案**：
+\`\`\`bash
+# 尝试这个命令
+command --fix-option
+\`\`\`
+
+### 问题 2: 性能缓慢
+
+**症状**：处理大文件时速度很慢
+
+**解决方案**：
+- 使用 `--batch-mode` 选项
+- 增加 `--chunk-size` 参数
+- 考虑分批处理
+
+## 🤝 贡献指南
+
+欢迎改进此 Skill！
+
+**改进方向**：
+- [ ] 添加更多输出格式支持
+- [ ] 提升处理性能
+- [ ] 完善错误处理
+
+**提交流程**：
+1. Fork 此项目
+2. 创建功能分支
+3. 提交 Pull Request
+
+## 📚 相关资源
+
+- [官方文档](https://...)
+- [示例项目](https://...)
+- [社区讨论](https://...)
+
+## 📄 许可证
+
+MIT License
+
+---
+
+## 变更历史
+
+### [1.0.0] - 2025-10-01
+- ✨ 初始版本发布
+\`\`\`
+
+#### ✍️ 文档编写要点
+
+**清晰性原则**：
+
+| 要素 | ✅ 好的做法 | ❌ 避免 |
+|------|-----------|--------|
+| **标题** | 描述性、简洁明了 | 过于抽象或技术化 |
+| **说明** | 用户视角、解决问题 | 实现细节、技术术语 |
+| **示例** | 完整可运行、有输出 | 片段代码、缺少上下文 |
+| **结构** | 逻辑清晰、渐进式 | 杂乱无章、跳跃过大 |
+
+**关键建议**：
+
+1. **先让它工作** - 提供最简单的成功案例
+2. **由浅入深** - 从基本用法到高级特性
+3. **实例优先** - 具体示例胜过抽象描述
+4. **预见问题** - 提前说明常见陷阱
+5. **保持更新** - 随代码变更更新文档
 
 ---
 
